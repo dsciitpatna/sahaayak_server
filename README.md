@@ -1,7 +1,7 @@
 # Sahaayak
 Sahaayak is a platform for the talented vendors and people who all are willing to work but not getting a right platform or chance to convert their passion and talent into their scalable profession. Creating a good and fair competition in the market allowing them to grow. This will allow customers to have a bunch of talents to select among the best combination (rate + rating).
 
-#API Schema
+# API Schema
 
 #### /users
 | Route      | Method   | Description                     | Authorization      |
