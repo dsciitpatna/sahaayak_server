@@ -13,7 +13,7 @@ Sahaayak is a platform for the talented vendors and people who all are willing t
 | /:buyerId  | [GET]    | get buyer details               | (this.user,Admin)  |
 | /:Id       | [PATCH]  | update user details             | (this.user)        |
 | /:Id       | [DELETE] | get user details                | (this.user, Admin) |
-| /vendors   | [GET]    | get list of all vendors details | (Anyone)           |
+| /vendors   | [GET]    | get list of all vendors details | (Admin)           |
 #### /catagories
 | Route        | Method   | Description           | Authorization |
 |--------------|----------|-----------------------|---------------|
@@ -34,7 +34,7 @@ Sahaayak is a platform for the talented vendors and people who all are willing t
 #### /reviews
 | Route               | Method   | Description                                            | Authorization                                 |
 |---------------------|----------|--------------------------------------------------------|-----------------------------------------------|
-| /:serviceId         | [GET]    | get all services                                       | (Anyone)                                      |
+| /:serviceId         | [GET]    | get all reviews                                        | (Anyone)                                      |
 | /:serviceId         | [POST]   | add review to a service                                | (Anyone ~ serviceId->vendor)                  |
 | /:serviceId         | [PATCH]  | update review to a service given by the logged in user | (loggedIn->userId==serviceId->review->userId) |
 | /:serviceId         | [DELETE] | delete review of service where review                  | (review->userId==logged in userId, Admin)     |
