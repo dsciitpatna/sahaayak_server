@@ -126,6 +126,30 @@ router.post('/login', (req, res) => {
 
 })
 
+//Api for getting list of all vendors
+router.get("/vendors", checkAuth, (req, res, next) => {
+    User.find()
+        .exec()
+        .then(users => {
+            if (users) {
+                res.status(200).json({
+                    users: users
+                });
+            } else {
+                res.status(404).json({
+                    message: "no entry found"
+                });
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
+
 // Get user details by ID
 router.get('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
     // If Id== vendor Id --> accessible to all
@@ -160,7 +184,7 @@ router.get('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
 
 // Update user details by ID
 router.patch('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
-    
+
 })
 
 
