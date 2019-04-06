@@ -160,7 +160,7 @@ router.get('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
 
 // Update user details by ID
 router.patch('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
-    
+
 })
 
 
