@@ -24,56 +24,59 @@ router.post('/signup', (req, res) => {
         if (!matched) {
             res.status(422).json({ msg: validator.errors });
         }
+        else {
+            const newUser = new User({
+                name,
+                email,
+                password,
+                isVendor,
+                isAdmin
+            })
+
+            User.findOne({ email })
+                .then(user => {
+                    if (user) return res.status(400).json({ msg: 'User Already exists' })
+
+                    // Create salt and hash
+                    bcrypt.genSalt(10, (err, salt) => {
+                        bcrypt.hash(newUser.password, salt, (err, hash) => {
+                            if (err) throw err;
+                            newUser.password = hash;
+                            newUser
+                                .save()
+                                .then(user => {
+                                    jwt.sign(
+                                        { id: user.id, isAdmin: user.isAdmin },
+                                        config.get('jwtSecret'),
+                                        { expiresIn: 3600 },
+                                        (err, token) => {
+                                            if (err) throw err;
+                                            res.json({
+                                                token,
+                                                user: {
+                                                    id: user.id,
+                                                    name: user.name,
+                                                    email: user.email,
+                                                    isVendor: user.isVendor,
+                                                    isAdmin: user.isAdmin
+                                                }
+                                            })
+                                        }
+                                    )
+                                })
+                        })
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    });
+                })
+        }
     });
 
-    const newUser = new User({
-        name,
-        email,
-        password,
-        isVendor,
-        isAdmin
-    })
 
-    User.findOne({ email })
-        .then(user => {
-            if (user) return res.status(400).json({ msg: 'User Already exists' })
-
-            // Create salt and hash
-            bcrypt.genSalt(10, (err, salt) => {
-                bcrypt.hash(newUser.password, salt, (err, hash) => {
-                    if (err) throw err;
-                    newUser.password = hash;
-                    newUser
-                        .save()
-                        .then(user => {
-                            jwt.sign(
-                                { id: user.id, isAdmin: user.isAdmin },
-                                config.get('jwtSecret'),
-                                { expiresIn: 3600 },
-                                (err, token) => {
-                                    if (err) throw err;
-                                    res.json({
-                                        token,
-                                        user: {
-                                            id: user.id,
-                                            name: user.name,
-                                            email: user.email,
-                                            isVendor: user.isVendor,
-                                            isAdmin: user.isAdmin
-                                        }
-                                    })
-                                }
-                            )
-                        })
-                })
-            })
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            });
-        })
 })
 
 // Login API
