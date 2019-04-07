@@ -8,7 +8,8 @@ const ServiceSchema = new Schema({
     },
     vendorId: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'user'
     },
     vendorName: {
         type: String,

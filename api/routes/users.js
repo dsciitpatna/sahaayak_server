@@ -46,7 +46,7 @@ router.post('/signup', (req, res) => {
                                 .save()
                                 .then(user => {
                                     jwt.sign(
-                                        { id: user.id, isAdmin: user.isAdmin },
+                                        { id: user.id, isAdmin: user.isAdmin, isVendor: user.isVendor },
                                         config.get('jwtSecret'),
                                         { expiresIn: 3600 },
                                         (err, token) => {
@@ -104,7 +104,7 @@ router.post('/login', (req, res) => {
                     if (!isMatch) res.status(400).json({ msg: 'Invalid credentials' });
 
                     jwt.sign(
-                        { id: user.id, isAdmin: user.isAdmin },
+                        { id: user.id, isAdmin: user.isAdmin, isVendor: user.isVendor },
                         config.get('jwtSecret'),
                         { expiresIn: 360000 },
                         (err, token) => {
