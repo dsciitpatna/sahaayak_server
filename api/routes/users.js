@@ -11,7 +11,7 @@ const User = require('../models/user');
 
 // Signup API
 router.post('/signup', (req, res) => {
-    const { name, email, password, isVendor } = req.body;
+    const { name, email, password, isVendor, isAdmin } = req.body;
 
     // Validation
     let validator = new v(req.body, {
@@ -30,7 +30,8 @@ router.post('/signup', (req, res) => {
         name,
         email,
         password,
-        isVendor
+        isVendor,
+        isAdmin
     })
 
     User.findOne({ email })
@@ -57,7 +58,8 @@ router.post('/signup', (req, res) => {
                                             id: user.id,
                                             name: user.name,
                                             email: user.email,
-                                            isVendor: user.isVendor
+                                            isVendor: user.isVendor,
+                                            isAdmin: user.isAdmin
                                         }
                                     })
                                 }
@@ -99,7 +101,7 @@ router.post('/login', (req, res) => {
                     if (!isMatch) res.status(400).json({ msg: 'Invalid credentials' });
 
                     jwt.sign(
-                        { id: user.id },
+                        { id: user.id, isAdmin: user.isAdmin },
                         config.get('jwtSecret'),
                         { expiresIn: 3600 },
                         (err, token) => {
@@ -110,7 +112,8 @@ router.post('/login', (req, res) => {
                                     id: user.id,
                                     name: user.name,
                                     email: user.email,
-                                    isVendor: user.isVendor
+                                    isVendor: user.isVendor,
+                                    isAdmin: user.isAdmin
                                 }
                             })
                         }
@@ -125,6 +128,37 @@ router.post('/login', (req, res) => {
         })
 
 })
+
+//Api for getting list of all vendors
+router.get("/vendors", checkAuth, (req, res, next) => {
+    User.find()
+        .exec()
+        .then(users => {
+            if (req.user.isAdmin) {
+                if (users) {
+                    res.status(200).json({
+                        users: users
+                    });
+                } else {
+                    res.status(404).json({
+                        message: "no entry found"
+                    });
+                }
+            }
+            else {
+                res.status(401).json({
+                    message: "Unautherized access"
+                })
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
 
 // Get user details by ID
 router.get('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
