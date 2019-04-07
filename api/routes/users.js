@@ -226,7 +226,27 @@ router.get('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
 router.patch('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
     const id=req.params.Id;
     const { name, email, password, isVendor, isAdmin } = req.body;
-    //re
+
+    const obj={};
+    if(name){
+        obj.name='required|minLength:5';
+    }
+    if(email){
+        obj.email='required|email';
+    }
+    if(password){
+        obj.password='required';
+    }
+
+    // Validation
+    let validator = new v(req.body, obj);
+
+    validator.check().then(function (matched) {
+        if (!matched) {
+            res.status(422).json({ msg: validator.errors });
+        }
+    });
+
     User.findById(id)
         .exec()
         .then(user => {
