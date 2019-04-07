@@ -159,21 +159,15 @@ router.delete('/:Id', checkAuth, (req, res) => {
 
 })
 
-//Api for getting list of all vendors (Access: admin    )
+//Api for getting list of all vendors (Access: admin )
 router.get("/vendors", checkAuth, (req, res, next) => {
-    User.find()
+    User.find({ isVendor: true })
         .exec()
         .then(users => {
             if (req.user.isAdmin) {
                 if (users) {
-                    var usersData=[];
-                    users.forEach(user=>{
-                        if (user.isVendor){
-                            usersData.push(user);
-                        }
-                    })
                     res.status(200).json({
-                        users: usersData
+                        users: users
                     });
                 } else {
                     res.status(404).json({
