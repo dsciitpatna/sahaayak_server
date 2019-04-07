@@ -189,6 +189,36 @@ router.get("/vendors", checkAuth, (req, res, next) => {
         });
 });
 
+//Api for getting all users (Access: admin)
+router.get("/", checkAuth, (req, res, next) => {
+    User.find()
+        .exec()
+        .then(users => {
+            if (req.user.isAdmin) {
+                if (users) {
+                    res.status(200).json({
+                        users: users
+                    });
+                } else {
+                    res.status(404).json({
+                        message: "no entry found"
+                    });
+                }
+            }
+            else {
+                res.status(401).json({
+                    message: "Unautherized access"
+                })
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
 
 // Get user details by ID
 router.get('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
