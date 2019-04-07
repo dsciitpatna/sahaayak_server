@@ -224,7 +224,29 @@ router.get('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
 
 // Update user details by ID
 router.patch('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
-
+    const id=req.params.Id;
+    const { name, email, password, isVendor, isAdmin } = req.body;
+    //re
+    User.findById(id)
+        .exec()
+        .then(user => {
+            //console.log(user);
+            if (user) {
+                User.findByIdAndUpdate(id,req.body,{new:true}).then((updatedUser)=>{
+                    res.status(200).json(updatedUser);
+                });
+            } else {
+                res.status(404).json({
+                    message: "No entry found for given ID"
+                })
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            })
+        })
 })
 
 
