@@ -256,27 +256,48 @@ router.get('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
 router.patch('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
     const id=req.params.Id;
     const { name, email, password, isVendor, isAdmin } = req.body;
-    //re
-    User.findById(id)
-        .exec()
-        .then(user => {
-            //console.log(user);
-            if (user) {
-                User.findByIdAndUpdate(id,req.body,{new:true}).then((updatedUser)=>{
-                    res.status(200).json(updatedUser);
-                });
-            } else {
-                res.status(404).json({
-                    message: "No entry found for given ID"
-                })
-            }
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
+
+    const obj={};
+    if(name){
+        obj.name='required|minLength:5';
+    }
+    if(email){
+        obj.email='required|email';
+    }
+    if(password){
+        obj.password='required';
+    }
+
+    // Validation
+    let validator = new v(req.body, obj);
+
+    validator.check().then(function (matched) {
+        if (!matched) {
+            res.status(422).json({ msg: validator.errors });
+        } else {
+            User.findById(id)
+            .exec()
+            .then(user => {
+                if (user) {
+                    User.findByIdAndUpdate(id,req.body,{new:true}).then((updatedUser)=>{
+                        res.status(200).json(updatedUser);
+                    });
+                } else {
+                    res.status(404).json({
+                        message: "No entry found for given ID"
+                    })
+                }
             })
-        })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        }
+    });
+
+    
 })
 
 
