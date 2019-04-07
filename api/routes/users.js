@@ -189,7 +189,7 @@ router.get("/vendors", checkAuth, (req, res, next) => {
         });
 });
 
-//Api for getting all users
+//Api for getting all users (Access: admin)
 router.get("/", checkAuth, (req, res, next) => {
     User.find()
         .exec()
