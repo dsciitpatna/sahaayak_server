@@ -244,29 +244,30 @@ router.patch('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => 
     validator.check().then(function (matched) {
         if (!matched) {
             res.status(422).json({ msg: validator.errors });
+        } else {
+            User.findById(id)
+            .exec()
+            .then(user => {
+                if (user) {
+                    User.findByIdAndUpdate(id,req.body,{new:true}).then((updatedUser)=>{
+                        res.status(200).json(updatedUser);
+                    });
+                } else {
+                    res.status(404).json({
+                        message: "No entry found for given ID"
+                    })
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
         }
     });
 
-    User.findById(id)
-        .exec()
-        .then(user => {
-            //console.log(user);
-            if (user) {
-                User.findByIdAndUpdate(id,req.body,{new:true}).then((updatedUser)=>{
-                    res.status(200).json(updatedUser);
-                });
-            } else {
-                res.status(404).json({
-                    message: "No entry found for given ID"
-                })
-            }
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            })
-        })
+    
 })
 
 
