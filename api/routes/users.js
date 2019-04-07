@@ -78,7 +78,7 @@ router.post('/signup', (req, res) => {
 
 // Login API
 router.post('/login', (req, res) => {
-    const { email, password } = req.body;
+    const { email, password,isAdmin} = req.body;
 
     // Validation
     let validator = new v(req.body, {
@@ -194,6 +194,74 @@ router.get('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
 
 // Update user details by ID
 router.patch('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
+    const {name,email,password,isVendor}=req.body;
+    const id=req.params.Id;
+
+    let validator = new v(req.body, {
+        name: 'required|minLength:5',
+        email: 'required|email',
+        password: 'required',
+        isVendor:'required'
+    });
+
+    validator.check().then(function (matched) {
+        if (!matched) {
+            res.status(422).json({ msg: validator.errors });
+        }
+    });
+
+    User.findById(id)
+    .exec()
+    .then(user => {
+        //console.log(user);
+        if (user) {
+            if (user.id == req.user.id) {
+
+                user.name=name;
+                user.email=email;
+                user.isVendor=isVendor;
+
+                bcrypt.genSalt(10, (err, salt) => {
+                    bcrypt.hash(user.password, salt, (err, hash) => {
+                        if (err) throw err;
+                        user.password = hash;
+                        user
+                            .save()
+                            .then(user => {
+                                        res.json({
+                                            user: {
+                                                id: user.id,
+                                                name: user.name,
+                                                email: user.email,
+                                                isVendor: user.isVendor,
+                                                isAdmin: user.isAdmin
+                                            }
+                                        })
+                            })
+                    })
+                })                
+
+            } else {
+                res.status(422).json({
+                    msg: "Unauthorised Request"
+                })
+            }
+        } else {
+            res.status(404).json({
+                message: "No entry found for given ID"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
+
+    
+
+
 
 })
 
