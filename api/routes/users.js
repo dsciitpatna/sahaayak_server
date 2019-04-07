@@ -47,7 +47,7 @@ router.post('/signup', (req, res) => {
                         .save()
                         .then(user => {
                             jwt.sign(
-                                { id: user.id },
+                                { id: user.id, isAdmin: user.isAdmin },
                                 config.get('jwtSecret'),
                                 { expiresIn: 3600 },
                                 (err, token) => {
@@ -103,7 +103,7 @@ router.post('/login', (req, res) => {
                     jwt.sign(
                         { id: user.id, isAdmin: user.isAdmin },
                         config.get('jwtSecret'),
-                        { expiresIn: 3600 },
+                        { expiresIn: 360000 },
                         (err, token) => {
                             if (err) throw err;
                             res.json({
@@ -126,6 +126,33 @@ router.post('/login', (req, res) => {
                 error: err
             });
         })
+
+})
+
+//Api for deleting the user , can be accessed by only logged in user who can only delete self account and the admin who can delete any account
+
+router.delete('/:Id', checkAuth, (req, res) => {
+    const id = req.params.Id;
+    const { Id, isAdmin } = req.user
+    if (id === Id || isAdmin) {
+        User.remove({ _id: id }, (err) => {
+            if (!err) {
+                return res.status(200).json({
+                    message: "Successfully Removed"
+                })
+            }
+            else {
+                res.status(500).json({
+                    error: err
+                })
+            }
+        })
+    }
+    else {
+        res.status(500).json({
+            message: "Unauthorized Access"
+        })
+    }
 
 })
 
