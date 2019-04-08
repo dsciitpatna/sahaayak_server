@@ -49,6 +49,35 @@ router.post('/',(req,res)=>{
 
 })
 
+router.get("/vendors", checkAuth, (req, res, next) => {
+    Catagories.find()
+        .exec()
+        .then(category => {
+            if (req.user.isAdmin) {
+                if (category) {
+                    res.status(200).json({
+                        category: category
+                    });
+                } else {
+                    res.status(404).json({
+                        message: "no entry found"
+                    });
+                }
+            }
+            else {
+                res.status(401).json({
+                    message: "Unautherized access"
+                })
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
 
 router.patch('/:catagoryId',(req,res)=>{
     const id=req.params.id;
