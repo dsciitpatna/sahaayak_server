@@ -159,9 +159,9 @@ router.delete('/:Id', checkAuth, (req, res) => {
 
 })
 
-//Api for getting list of all vendors
+//Api for getting list of all vendors (Access: admin )
 router.get("/vendors", checkAuth, (req, res, next) => {
-    User.find()
+    User.find({ isVendor: true })
         .exec()
         .then(users => {
             if (req.user.isAdmin) {
