@@ -11,6 +11,10 @@ const Catagories = require('../models/catagory');
 
 router.post('/',(req,res)=>{
     const {name}=req.body;
+    const isAdmin=req.user.isAdmin;
+
+    if(isAdmin) return res.status(422).json({msg: "Unauthorised Request"})
+
 
     let validator = new v(req.body, {
         name: 'required|minLength:7'
@@ -48,6 +52,9 @@ router.post('/',(req,res)=>{
 
 router.patch('/:catagoryId',(req,res)=>{
     const id=req.params.id;
+    const isAdmin=req.user.isAdmin;
+
+    if(isAdmin) return res.status(422).json({msg: "Unauthorised Request"})
 
     let validator = new v(req.body, {
         name: 'required|minLength:7'
