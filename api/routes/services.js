@@ -13,9 +13,9 @@ const Services = require('../models/service');
 router.get('/:serviceId',(req, res) => {
     const id = req.params.serviceId;
     Service.findById(id)
+        .populate('vendor', '_id name')
         .exec()
         .then(service => {
-            //console.log(user);
             if (service) {
                 res.status(200).json({
                     service: service
