@@ -12,6 +12,7 @@ const Services = require('../models/service');
 //Api for getting all services (Access: all)
 router.get("/", (req, res, next) => {
     Service.find()
+        .populate('vendor', '_id name')
         .exec()
         .then(services => {
             if (services) {
@@ -34,7 +35,7 @@ router.get("/", (req, res, next) => {
 
 //Api for posting a service (Access: vendor)
 router.post("/", checkAuth, (req, res, next) => {
-    const { name, vendorId, vendorName, details, rating } = req.body;
+    const { name, detail, rating } = req.body;
 
     // Validation
     let validator = new v(req.body, {
@@ -46,15 +47,15 @@ router.post("/", checkAuth, (req, res, next) => {
             res.status(422).json({ msg: validator.errors });
         }
         else {
+            const vendor = req.user.id;
             const newService = new Service({
                 name,
-                vendorId,
-                vendorName,
-                details,
+                vendor,
+                detail,
                 rating
             });
           
-            Service.findOne({ vendorId,name })
+            Service.findOne({ vendor,name })
                 .then(service => {
                     if (service) return res.status(400).json({ msg: 'Vendor service already exists' });
         

@@ -6,20 +6,16 @@ const ServiceSchema = new Schema({
         type: String,
         required: true
     },
-    vendorId: {
+    vendor: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'user'
     },
-    vendorName: {
-        type: String,
-        required: true
-    },
-    detail: [{
+    detail: {
         description: String,
         location: String,
         contact: String
-    }],
+    },
     rating: {
         type: Number,
         default: -1
