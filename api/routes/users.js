@@ -266,6 +266,9 @@ router.patch('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => 
     }
     if(password){
         obj.password='required';
+        let salt = bcrypt.genSaltSync(10);
+        let hash = bcrypt.hashSync(password, salt);
+        req.body.password =  hash;
     }
 
     // Validation
