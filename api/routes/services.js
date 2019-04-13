@@ -54,11 +54,11 @@ router.post("/", checkAuth, (req, res, next) => {
                 detail,
                 rating
             });
-          
-            Service.findOne({ vendor,name })
+
+            Service.findOne({ vendor, name })
                 .then(service => {
                     if (service) return res.status(400).json({ msg: 'Vendor service already exists' });
-        
+
                     if (req.user.isVendor) {
                         newService
                             .save()
@@ -67,7 +67,7 @@ router.post("/", checkAuth, (req, res, next) => {
                                     service: service
                                 })
                             })
-                        } else {
+                    } else {
                         res.status(401).json({
                             message: "Unautherized access"
                         })
@@ -81,11 +81,11 @@ router.post("/", checkAuth, (req, res, next) => {
                 })
         }
     });
-    
+
 });
 
 // Get a service by ID  (access: all)
-router.get('/:serviceId',(req, res) => {
+router.get('/:serviceId', (req, res) => {
     const id = req.params.serviceId;
     Service.findById(id)
         .populate('vendor', '_id name')
@@ -103,6 +103,31 @@ router.get('/:serviceId',(req, res) => {
         })
         .catch(err => {
             console.log(err);
+            res.status(500).json({
+                error: err
+            })
+        })
+})
+
+// Get all services provided by a vendor
+
+router.get('/vendors/:vendorId', checkAuth, (req, res) => {
+    const vendorId = req.params.vendorId;
+    Service.find({ vendor: vendorId }).
+        exec().
+        then(services => {
+            if (services.length !== 0) {
+                res.status(200).json({
+                    services: services
+                })
+            }
+            else {
+                res.status(400).json({
+                    message: "No entry for given vendor id"
+                })
+            }
+        })
+        .catch(err => {
             res.status(500).json({
                 error: err
             })
