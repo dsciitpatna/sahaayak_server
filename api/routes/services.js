@@ -54,11 +54,11 @@ router.post("/", checkAuth, (req, res, next) => {
                 detail,
                 rating
             });
-          
-            Service.findOne({ vendor,name })
+
+            Service.findOne({ vendor, name })
                 .then(service => {
                     if (service) return res.status(400).json({ msg: 'Vendor service already exists' });
-        
+
                     if (req.user.isVendor) {
                         newService
                             .save()
@@ -67,7 +67,7 @@ router.post("/", checkAuth, (req, res, next) => {
                                     service: service
                                 })
                             })
-                        } else {
+                    } else {
                         res.status(401).json({
                             message: "Unautherized access"
                         })
@@ -81,11 +81,11 @@ router.post("/", checkAuth, (req, res, next) => {
                 })
         }
     });
-    
+
 });
 
 // Get a service by ID  (access: all)
-router.get('/:serviceId',(req, res) => {
+router.get('/:serviceId', (req, res) => {
     const id = req.params.serviceId;
     Service.findById(id)
         .populate('vendor', '_id name')
@@ -107,6 +107,37 @@ router.get('/:serviceId',(req, res) => {
                 error: err
             })
         })
+})
+
+router.delete('/:serviceId', checkAuth, (req, res) => {
+    const id = req.params.serviceId;
+    const { isVendor, isAdmin } = req.user
+    if (isVendor || isAdmin) {
+        Service.findByIdAndRemove(id)
+            .exec()
+            .then(service => {
+                if (service.length !== 0) {
+                    res.status(200).json({ service: service })
+                }
+                else {
+                    res.status(400).json({
+                        message: "No entry"
+                    })
+                }
+            })
+            .catch(err => {
+                res.status(404).json({
+                    error: err
+                })
+            })
+    }
+
+    else {
+        res.status(500).json({
+            message: "Unauthorized Access"
+        })
+    }
+
 })
 
 module.exports = router;
