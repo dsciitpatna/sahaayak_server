@@ -109,6 +109,7 @@ router.get('/:serviceId', (req, res) => {
         })
 })
 
+
 // Api for Updating a service
 router.patch('/:serviceId', checkAuth, (req, res) => {
     if (req.user.isVendor) {
@@ -151,4 +152,77 @@ router.patch('/:serviceId', checkAuth, (req, res) => {
         })
     }
 })
+
+// Get all services provided by a vendor
+
+router.get('/vendors/:vendorId', checkAuth, (req, res) => {
+    const vendorId = req.params.vendorId;
+    Service.find({ vendor: vendorId }).
+        exec().
+        then(services => {
+            if (services.length !== 0) {
+                res.status(200).json({
+                    services: services
+                })
+            }
+            else {
+                res.status(400).json({
+                    message: "No entry for given vendor id"
+                })
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            })
+        })
+})
+
+
+// Update a service by Id  (access: vendor)
+router.patch('/:serviceId', checkAuth, (req, res) => {
+    const id=req.params.serviceId;
+    const { name, detail, rating } = req.body;
+
+    const obj={};
+    if(name){
+        obj.name='required|minLength:5';
+    }
+
+    // Validation
+    let validator = new v(req.body, obj);
+
+    validator.check().then(function (matched) {
+        if (!matched) {
+            res.status(422).json({ msg: validator.errors });
+        } else {
+            Service.findById(id)
+            .exec()
+            .then(service => {
+                if (service) {
+                    if ( req.user.isVendor ) {
+                        Service.findByIdAndUpdate(id,req.body,{new:true}).then((updatedService)=>{
+                            res.status(200).json(updatedService);
+                        });
+                    } else {
+                        res.status(422).json({
+                            message: "Unauthorised Request"
+                        })
+                    }
+                } else {
+                    res.status(404).json({
+                        message: "No entry found for given ID"
+                    })
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        }
+    });
+})
+
 module.exports = router;
