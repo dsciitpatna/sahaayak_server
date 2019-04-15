@@ -46,7 +46,7 @@ router.post('/signup', (req, res) => {
                                 .save()
                                 .then(user => {
                                     jwt.sign(
-                                        { id: user.id, isAdmin: user.isAdmin, isVendor: user.isVendor },
+                                        { id: user.id, name: user.name, isAdmin: user.isAdmin, isVendor: user.isVendor },
                                         config.get('jwtSecret'),
                                         { expiresIn: 3600 },
                                         (err, token) => {
@@ -104,7 +104,7 @@ router.post('/login', (req, res) => {
                     if (!isMatch) res.status(400).json({ msg: 'Invalid credentials' });
 
                     jwt.sign(
-                        { id: user.id, isAdmin: user.isAdmin, isVendor: user.isVendor },
+                        { id: user.id, name: user.name, isAdmin: user.isAdmin, isVendor: user.isVendor },
                         config.get('jwtSecret'),
                         { expiresIn: 360000 },
                         (err, token) => {
@@ -254,21 +254,21 @@ router.get('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
 
 // Update user details by ID
 router.patch('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
-    const id=req.params.Id;
+    const id = req.params.Id;
     const { name, email, password, isVendor, isAdmin } = req.body;
 
-    const obj={};
-    if(name){
-        obj.name='required|minLength:5';
+    const obj = {};
+    if (name) {
+        obj.name = 'required|minLength:5';
     }
-    if(email){
-        obj.email='required|email';
+    if (email) {
+        obj.email = 'required|email';
     }
-    if(password){
-        obj.password='required';
+    if (password) {
+        obj.password = 'required';
         let salt = bcrypt.genSaltSync(10);
         let hash = bcrypt.hashSync(password, salt);
-        req.body.password =  hash;
+        req.body.password = hash;
     }
 
     // Validation
@@ -279,28 +279,28 @@ router.patch('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => 
             res.status(422).json({ msg: validator.errors });
         } else {
             User.findById(id)
-            .exec()
-            .then(user => {
-                if (user) {
-                    User.findByIdAndUpdate(id,req.body,{new:true}).then((updatedUser)=>{
-                        res.status(200).json(updatedUser);
-                    });
-                } else {
-                    res.status(404).json({
-                        message: "No entry found for given ID"
-                    })
-                }
-            })
-            .catch(err => {
-                console.log(err);
-                res.status(500).json({
-                    error: err
+                .exec()
+                .then(user => {
+                    if (user) {
+                        User.findByIdAndUpdate(id, req.body, { new: true }).then((updatedUser) => {
+                            res.status(200).json(updatedUser);
+                        });
+                    } else {
+                        res.status(404).json({
+                            message: "No entry found for given ID"
+                        })
+                    }
                 })
-            })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    })
+                })
         }
     });
 
-    
+
 })
 
 
