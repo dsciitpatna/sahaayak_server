@@ -18,6 +18,8 @@ module.exports = router;
 router.get('/:serviceId', checkAuth, (req, res) => {
     const serviceId = req.params.serviceId
     Reviews.find({ service: serviceId })
+        .populate('user', '_id name')
+        .populate('service')
         .exec()
         .then(reviews => {
             if (reviews.length === 0) {
@@ -37,7 +39,6 @@ router.get('/:serviceId', checkAuth, (req, res) => {
 
 })
 
-
 // Api for changing or updating the review (Access : loggedinuser == serviceId->review->userId)
 
 router.patch('/:serviceId', checkAuth, (req, res) => {
@@ -51,7 +52,7 @@ router.patch('/:serviceId', checkAuth, (req, res) => {
                     message: "No Reviews found"
                 })
             }
-            if (review.userId == loggedUserId) {
+            if (review.user == loggedUserId) {
                 const { rating, review } = req.body
                 let validator = new v(req.body, {
                     rating: 'required|integer',
@@ -62,7 +63,7 @@ router.patch('/:serviceId', checkAuth, (req, res) => {
                         if (!matched) {
                             return res.status(422).json({ msg: validator.errors });
                         }
-                        Reviews.findOneAndUpdate({ service: serviceId }, { rating, review }, { new: true })
+                        Reviews.findOneAndUpdate({ user: review.user, service: serviceId }, { rating, review }, { new: true })
                             .then(review => {
                                 res.status(200).json({
                                     review: review
