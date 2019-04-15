@@ -16,6 +16,11 @@ const ReviewSchema = new Schema({
         max: 5,
         required: true
     },
+    service: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'service'
+    },
     review: {
         type: String,
         trim: true,
