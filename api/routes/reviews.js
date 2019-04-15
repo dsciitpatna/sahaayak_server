@@ -18,6 +18,8 @@ module.exports = router;
 router.get('/:serviceId', checkAuth, (req, res) => {
     const serviceId = req.params.serviceId
     Reviews.find({ service: serviceId })
+        .populate('user', '_id name')
+        .populate('service')
         .exec()
         .then(reviews => {
             if (reviews.length === 0) {
