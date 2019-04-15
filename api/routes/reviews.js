@@ -45,13 +45,23 @@ router.post('/:serviceId', checkAuth, (req, res) => {
                             message: "Can not review more then once"
                         })
                     }
-                    newReview
-                        .save()
-                        .then(review => {
-                            res.json({
-                                review: review
-                            })
+                    Services.findById(serviceId)
+                        .exec()
+                        .then(service => {
+                            if (service.vendor == userId) {
+                                return res.status(401).json({
+                                    message: "Cannot review own service"
+                                })
+                            }
+                            newReview
+                                .save()
+                                .then(review => {
+                                    res.json({
+                                        review: review
+                                    })
+                                })
                         })
+
 
                 })
                 .catch(err => {
