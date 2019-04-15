@@ -138,12 +138,12 @@ router.get('/vendors/:vendorId', checkAuth, (req, res) => {
 
 // Update a service by Id  (access: vendor)
 router.patch('/:serviceId', checkAuth, (req, res) => {
-    const id=req.params.serviceId;
+    const id = req.params.serviceId;
     const { name, detail, rating } = req.body;
 
-    const obj={};
-    if(name){
-        obj.name='required|minLength:5';
+    const obj = {};
+    if (name) {
+        obj.name = 'required|minLength:5';
     }
 
     // Validation
@@ -154,32 +154,73 @@ router.patch('/:serviceId', checkAuth, (req, res) => {
             res.status(422).json({ msg: validator.errors });
         } else {
             Service.findById(id)
+                .exec()
+                .then(service => {
+                    if (service) {
+                        if (req.user.isVendor) {
+                            Service.findByIdAndUpdate(id, req.body, { new: true }).then((updatedService) => {
+                                res.status(200).json(updatedService);
+                            });
+                        } else {
+                            res.status(422).json({
+                                message: "Unauthorised Request"
+                            })
+                        }
+                    } else {
+                        res.status(404).json({
+                            message: "No entry found for given ID"
+                        })
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    })
+                })
+        }
+    });
+})
+// Api to delete a service
+router.delete('/:serviceId', checkAuth, (req, res) => {
+
+    const id = req.params.serviceId;
+    const vendorId = req.user.id;
+
+    const { isVendor, isAdmin } = req.user
+    if (isVendor || isAdmin) {
+        Services.findOne({ _id: id, vendor: vendorId })
             .exec()
             .then(service => {
                 if (service) {
-                    if ( req.user.isVendor ) {
-                        Service.findByIdAndUpdate(id,req.body,{new:true}).then((updatedService)=>{
-                            res.status(200).json(updatedService);
-                        });
-                    } else {
-                        res.status(422).json({
-                            message: "Unauthorised Request"
+                    Service.findByIdAndRemove(id)
+                        .exec()
+                        .then(servic => {
+                            res.status(200).json({ service: servic })
                         })
-                    }
-                } else {
+                        .catch(err => {
+                            res.status(404).json({
+                                error: err
+                            })
+                        })
+                }
+                else {
                     res.status(404).json({
-                        message: "No entry found for given ID"
+                        message: "No Entry Found"
                     })
                 }
             })
             .catch(err => {
-                console.log(err);
-                res.status(500).json({
-                    error: err
-                })
+                error: err
             })
-        }
-    });
+    }
+
+    else {
+        res.status(500).json({
+            message: "Unauthorized Access"
+        })
+    }
+
 })
 
 
