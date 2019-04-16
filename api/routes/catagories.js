@@ -9,25 +9,18 @@ const checkAuth = require('../middleware/auth');
 
 const Catagories = require('../models/catagory');
 
-router.get("/vendors", checkAuth, (req, res, next) => {
+router.get("/", (req, res, next) => {
     Catagories.find()
         .exec()
         .then(category => {
-            if (req.user.isAdmin) {
-                if (category) {
-                    res.status(200).json({
-                        category: category
-                    });
-                } else {
-                    res.status(404).json({
-                        message: "no entry found"
-                    });
-                }
-            }
-            else {
-                res.status(401).json({
-                    message: "Unautherized access"
-                })
+            if (category) {
+                res.status(200).json({
+                    categories: category
+                });
+            } else {
+                res.status(404).json({
+                    message: "no entry found"
+                });
             }
         })
         .catch(err => {
@@ -44,18 +37,16 @@ router.post('/',checkAuth,(req,res)=>{
     const {name}=req.body;
     const isAdmin=req.user.isAdmin;
 
-    if(isAdmin) return res.status(422).json({msg: "Unauthorised Request"})
+    if(!isAdmin) return res.status(422).json({msg: "Unauthorised Request"})
 
     let validator = new v(req.body, {
         name: 'required|minLength:7'
     });
 
     validator.check().then(function(matched){
-        if(!matched)
-        {
+        if(!matched) {
             res.status(422).json({msg:validator.errors})
-        }
-        else{
+        } else {
             const newCategory = new Catagories({
                 name
             })
@@ -67,36 +58,38 @@ router.post('/',checkAuth,(req,res)=>{
                         newCategory
                             .save()
                             .then(category=>{
-                                return res.json({
-                                    category: {
-                                        name: category.name
-                                    }
-                                })
+                                return res.json(category)
                             })
                       })
+                      .catch(err => {
+                            console.log(err);
+                            res.status(500).json({
+                                error: err
+                            })
+                       })  
         }
     })
 
 })
 
-router.delete('/', checkAuth, (req, res) => {
-    const {  isAdmin } = req.user
+router.delete('/:categoryId', checkAuth, (req, res) => {
+    const id = req.params.categoryId;
+    const isAdmin = req.user.isAdmin;
+    
     if (isAdmin) {
         Catagories.remove({ _id: id }, (err) => {
             if (!err) {
                 return res.status(200).json({
                     message: "Successfully Removed"
                 })
-            }
-            else {
+            } else {
                 res.status(500).json({
                     error: err
                 })
             }
         })
-    }
-    else {
-        res.status(500).json({
+    } else {
+        res.status(422).json({
             message: "Unauthorized Access"
         })
     }
@@ -105,9 +98,8 @@ router.delete('/', checkAuth, (req, res) => {
 
 
 router.patch('/:catagoryId',checkAuth,(req,res)=>{
-    const id=req.params.id;
-
-    const isAdmin=req.user.isAdmin;
+    const id = req.params.categoryId;
+    const isAdmin = req.user.isAdmin;
 
     if(isAdmin) return res.status(422).json({msg: "Unauthorised Request"})
 
