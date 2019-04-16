@@ -91,45 +91,38 @@ router.post("/:serviceId", checkAuth, (req, res, next) => {
     const loggedUserId = req.user.id;
     const { rating, review } = req.body;
 
-    if (req.user) {
-        // Validation
-        let validator = new v(req.body, {
-            rating: 'required|integer',
-            review: 'required|string'
-        });
+    // Validation
+    let validator = new v(req.body, {
+        rating: 'required|integer',
+        review: 'required|string'
+    });
 
-        validator.check().then(function (matched) {
-            if (!matched) {
-                res.status(422).json({ msg: validator.errors });
-            }
-            else {
-                Service.findOne({ _id: serviceId })
-                    .then(service => {
-                        if (!service) return res.status(400).json({ msg: 'Vendor service does not exist' });
+    validator.check().then(function (matched) {
+        if (!matched) {
+            res.status(422).json({ msg: validator.errors });
+        }
+        else {
+            Service.findOne({ _id: serviceId })
+                .then(service => {
+                    if (!service) return res.status(400).json({ msg: 'Vendor service does not exist' });
 
-                        const newReview = new Review(req.body);
-                        newReview
-                            .save()
-                            .then(review => {
-                                res.json({
-                                    review: review
-                                })
+                    const newReview = new Review(req.body);
+                    newReview
+                        .save()
+                        .then(review => {
+                            res.json({
+                                review: review
                             })
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        res.status(500).json({
-                            error: err
-                        });
-                    })
-            }
-        });
-    }
-    else {
-        return res.status(401).json({
-            message: "Unathorised"
-        })
-    }
+                        })
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    });
+                })
+        }
+    });
 
 });
 
