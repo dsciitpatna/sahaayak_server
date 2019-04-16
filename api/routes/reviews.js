@@ -84,7 +84,7 @@ router.patch('/:serviceId', checkAuth, (req, res) => {
         })
 })
 
-// Api for posting a review to a service
+// Api for posting a review to a service (Access : Anyone ~ serviceId->vendor)
 
 router.post("/:serviceId", checkAuth, (req, res, next) => {
     const serviceId = req.params.serviceId;
