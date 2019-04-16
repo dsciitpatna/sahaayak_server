@@ -38,3 +38,48 @@ router.get('/:serviceId', checkAuth, (req, res) => {
         })
 
 })
+
+// Api for changing or updating the review (Access : loggedinuser == serviceId->review->userId)
+
+router.patch('/:serviceId', checkAuth, (req, res) => {
+    const serviceId = req.params.serviceId
+    const loggedUserId = req.user.id
+    Reviews.findOne({ service: serviceId })
+        .exec()
+        .then(review => {
+            if (!review) {
+                return res.status(404).json({
+                    message: "No Reviews found"
+                })
+            }
+            if (review.user == loggedUserId) {
+                const { rating, review } = req.body
+                let validator = new v(req.body, {
+                    rating: 'required|integer',
+                    review: 'required|string'
+                });
+                validator.check()
+                    .then(function (matched) {
+                        if (!matched) {
+                            return res.status(422).json({ msg: validator.errors });
+                        }
+                        Reviews.findOneAndUpdate({ user: review.user, service: serviceId }, { rating, review }, { new: true })
+                            .then(review => {
+                                res.status(200).json({
+                                    review: review
+                                })
+                            })
+
+                    })
+            }
+            else {
+                return res.status(401).json({
+                    message: "Unathorised"
+                })
+            }
+
+        })
+        .catch(err => {
+            error: err
+        })
+})
