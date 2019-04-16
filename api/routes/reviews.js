@@ -83,3 +83,27 @@ router.patch('/:serviceId', checkAuth, (req, res) => {
             error: err
         })
 })
+
+// Api for getting a particular review by some user
+
+router.get('/:serviceId/:userId', checkAuth, (req, res) => {
+    const serviceId = req.params.serviceId;
+    const userId = req.params.userId;
+
+
+    Reviews.findOne({ user: userId, service: serviceId })
+        .exec()
+        .then(review => {
+            if (review) {
+                return res.status(200).json({
+                    review: review
+                })
+            }
+            return res.status(404).json({
+                message: "No review found"
+            })
+        })
+        .catch(err => {
+            error: err
+        })
+})
