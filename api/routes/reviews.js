@@ -71,3 +71,31 @@ router.post('/:serviceId', checkAuth, (req, res) => {
     })
 
 })
+
+
+// Api for getting all reviews for a particular service Id
+
+router.get('/:serviceId', checkAuth, (req, res) => {
+    const serviceId = req.params.serviceId
+    Reviews.find({ service: serviceId })
+        .populate('user', '_id name')
+        .populate('service')
+        .exec()
+        .then(reviews => {
+            if (reviews.length === 0) {
+                return res.status(404).json({
+                    message: "No reviews found"
+                })
+            }
+            res.status(200).json({
+                reviews: reviews
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            })
+        })
+
+})
+
