@@ -91,12 +91,12 @@ router.get('/:serviceId/:userId', checkAuth, (req, res) => {
     const userId = req.params.userId;
 
 
-    Reviews.findOne({ user: userId, service: serviceId })
+    Reviews.find({ user: userId, service: serviceId })
         .exec()
-        .then(review => {
-            if (review) {
+        .then(reviews => {
+            if (reviews) {
                 return res.status(200).json({
-                    review: review
+                    reviews: reviews
                 })
             }
             return res.status(404).json({
