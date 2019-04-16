@@ -13,7 +13,7 @@ module.exports = router;
 
 
 
-// Api for getting all reviews for a particular service Id
+// Api for getting all reviews for a particular service Id 
 
 router.get('/:serviceId', checkAuth, (req, res) => {
     const serviceId = req.params.serviceId
@@ -83,6 +83,48 @@ router.patch('/:serviceId', checkAuth, (req, res) => {
             error: err
         })
 })
+
+// Api for posting a review to a service
+
+router.post("/:serviceId", (req, res, next) => {
+    const serviceId = req.params.serviceId;
+    const { rating, review } = req.body;
+
+    // Validation
+    let validator = new v(req.body, {
+        rating: 'required|integer',
+        review: 'required|string'
+    });
+
+    validator.check().then(function (matched) {
+        if (!matched) {
+            res.status(422).json({ msg: validator.errors });
+        }
+        else {
+            Service.findOne({ _id: serviceId })
+                .then(service => {
+                    if (!service) return res.status(400).json({ msg: 'Vendor service does not exist' });
+
+                    const newReview = new Review(req.body);
+                    newReview
+                        .save()
+                        .then(review => {
+                            res.json({
+                                review: review
+                            })
+                        })
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    });
+                })
+        }
+    });
+
+});
+
 
 // Api for getting a particular review by some user
 
