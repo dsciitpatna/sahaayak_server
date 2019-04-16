@@ -102,25 +102,35 @@ router.post("/:serviceId", checkAuth, (req, res, next) => {
             res.status(422).json({ msg: validator.errors });
         }
         else {
-            Service.findOne({ _id: serviceId })
-                .then(service => {
-                    if (!service) return res.status(400).json({ msg: 'Vendor service does not exist' });
+            Reviews.findOne({ service: serviceId, user: loggedUserId })
+            .exec()
+            .then(review => {
+                if (review) {
+                    return res.status(404).json({
+                        message: "Reviews already exists"
+                    })
+                }
+                else {
+                    Service.findOne({ _id: serviceId })
+                    .then(service => {
+                        if (!service) return res.status(400).json({ msg: 'Vendor service does not exist' });
 
-                    const newReview = new Review(req.body);
-                    newReview
-                        .save()
-                        .then(review => {
-                            res.json({
-                                review: review
+                        const newReview = new Review(req.body);
+                        newReview
+                            .save()
+                            .then(review => {
+                                res.json({
+                                    review: review
+                                })
                             })
-                        })
-                })
-                .catch(err => {
-                    console.log(err);
-                    res.status(500).json({
-                        error: err
-                    });
-                })
+                    })
+                }
+
+            })
+            .catch(err => {
+                error: err
+            })
+
         }
     });
 
