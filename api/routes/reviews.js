@@ -41,10 +41,11 @@ router.get('/:serviceId', checkAuth, (req, res) => {
 
 // Api for changing or updating the review (Access : loggedinuser == serviceId->review->userId)
 
-router.patch('/:serviceId', checkAuth, (req, res) => {
-    const serviceId = req.params.serviceId
-    const loggedUserId = req.user.id
-    Reviews.findOne({ service: serviceId })
+router.patch('/:serviceId/:reviewsId', checkAuth, (req, res) => {
+    const serviceId = req.params.serviceId;
+    const reviewsId = req.params.reviewsId;
+    const loggedUserId = req.user.id;
+    Reviews.findOne({ service: serviceId, _id: reviewsId })
         .exec()
         .then(review => {
             if (!review) {
@@ -53,7 +54,7 @@ router.patch('/:serviceId', checkAuth, (req, res) => {
                 })
             }
             if (review.user == loggedUserId) {
-                const { rating, review } = req.body
+                const { rating, review } = req.body;
                 let validator = new v(req.body, {
                     rating: 'required|integer',
                     review: 'required|string'
@@ -63,7 +64,7 @@ router.patch('/:serviceId', checkAuth, (req, res) => {
                         if (!matched) {
                             return res.status(422).json({ msg: validator.errors });
                         }
-                        Reviews.findOneAndUpdate({ user: review.user, service: serviceId }, { rating, review }, { new: true })
+                        Reviews.findOneAndUpdate({ _id: reviewsId },{ rating, review }, { new: true })
                             .then(review => {
                                 res.status(200).json({
                                     review: review
