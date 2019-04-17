@@ -95,7 +95,6 @@ router.post("/:serviceId", checkAuth, (req, res, next) => {
     Service.findOne({ _id: serviceId })
         .populate('vendor')
         .then(service => {
-            if ( !service ) return res.status(400).json({ msg: 'Vendor service does not exist' });
             if ( service.vendor.id==loggedUserId ) return res.status(401).json({ msg: 'Cannot review own service' });
 
             Reviews.findOne({ service: serviceId, user: loggedUserId })
