@@ -92,10 +92,17 @@ router.post("/:serviceId", checkAuth, (req, res, next) => {
     const loggedUserId = req.user.id;
     const { rating, review } = req.body;
 
-    if( req.user.isVendor && req.user.id==loggedUserId ) {
-        return res.status(401).json({
-            message: "Cannot review own service"
-        })
+    if( req.user.isVendor ) {
+        Service.findOne({ _id: serviceId })
+            .populate('vendor')
+            .exec()
+            .then(service => {
+                if( service.vendor.id==loggedUserId ) {
+                    return res.status(401).json({
+                        message: "Cannot review own service"
+                    })
+                }
+            })
     }
 
     Reviews.findOne({ service: serviceId, user: loggedUserId })
