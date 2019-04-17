@@ -8,6 +8,7 @@ const v = require('node-input-validator');
 const checkAuth = require('../middleware/auth');
 
 const Reviews = require('../models/review');
+const Services = require('../models/service');
 
 module.exports = router;
 
@@ -91,48 +92,52 @@ router.post("/:serviceId", checkAuth, (req, res, next) => {
     const loggedUserId = req.user.id;
     const { rating, review } = req.body;
 
-    // Validation
-    let validator = new v(req.body, {
-        rating: 'required|integer',
-        review: 'required|string'
-    });
+    Service.findOne({ _id: serviceId })
+        .populate('vendor')
+        .then(service => {
+            if ( !service ) return res.status(400).json({ msg: 'Vendor service does not exist' });
+            if ( service.vendor.id==loggedUserId ) return res.status(401).json({ msg: 'Cannot review own service' });
 
-    validator.check().then(function (matched) {
-        if (!matched) {
-            res.status(422).json({ msg: validator.errors });
-        }
-        else {
             Reviews.findOne({ service: serviceId, user: loggedUserId })
-            .exec()
-            .then(review => {
-                if (review) {
-                    return res.status(404).json({
-                        message: "Reviews already exists"
-                    })
-                }
-                else {
-                    Service.findOne({ _id: serviceId })
-                    .then(service => {
-                        if (!service) return res.status(400).json({ msg: 'Vendor service does not exist' });
+                .exec()
+                .then(review => {
+                    if (review) {
+                        return res.status(404).json({
+                            message: "Can not review more than once"
+                        })
+                    }
+                    else {
+                        // Validation
+                        let validator = new v(req.body, {
+                            rating: 'required|integer',
+                            review: 'required|string'
+                        });
 
-                        const newReview = new Review(req.body);
-                        newReview
-                            .save()
-                            .then(review => {
-                                res.json({
-                                    review: review
-                                })
-                            })
-                    })
-                }
+                        validator.check().then(function (matched) {
+                            if (!matched) {
+                                res.status(422).json({ msg: validator.errors });
+                            }
+                            else {
+                                const newReview = new Review(req.body);
+                                newReview
+                                    .save()
+                                    .then(review => {
+                                        res.json({
+                                            review: review
+                                        })
+                                    })
+                            }
+                        });
+                    }
 
-            })
-            .catch(err => {
-                error: err
-            })
-
-        }
-    });
+                })
+                .catch(err => {
+                    error: err
+                })
+    })
+    .catch(err => {
+        error: err
+    })
 
 });
 
