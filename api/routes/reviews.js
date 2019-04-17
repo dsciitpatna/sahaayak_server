@@ -92,51 +92,48 @@ router.post("/:serviceId", checkAuth, (req, res, next) => {
     const loggedUserId = req.user.id;
     const { rating, review } = req.body;
 
-    Service.findOne({ _id: serviceId })
-        .populate('vendor')
-        .then(service => {
-            if ( service.vendor.id==loggedUserId ) return res.status(401).json({ msg: 'Cannot review own service' });
+    if( req.user.isVendor && req.user.id==loggedUserId ) {
+        return res.status(401).json({
+            message: "Cannot review own service"
+        })
+    }
 
-            Reviews.findOne({ service: serviceId, user: loggedUserId })
-                .exec()
-                .then(review => {
-                    if (review) {
-                        return res.status(404).json({
-                            message: "Can not review more than once"
-                        })
+    Reviews.findOne({ service: serviceId, user: loggedUserId })
+        .exec()
+        .then(review => {
+            if (review) {
+                return res.status(404).json({
+                    message: "Can not review more than once"
+                })
+            }
+            else {
+                // Validation
+                let validator = new v(req.body, {
+                    rating: 'required|integer',
+                    review: 'required|string'
+                });
+
+                validator.check().then(function (matched) {
+                    if (!matched) {
+                        res.status(422).json({ msg: validator.errors });
                     }
                     else {
-                        // Validation
-                        let validator = new v(req.body, {
-                            rating: 'required|integer',
-                            review: 'required|string'
-                        });
-
-                        validator.check().then(function (matched) {
-                            if (!matched) {
-                                res.status(422).json({ msg: validator.errors });
-                            }
-                            else {
-                                const newReview = new Review(req.body);
-                                newReview
-                                    .save()
-                                    .then(review => {
-                                        res.json({
-                                            review: review
-                                        })
-                                    })
-                            }
-                        });
+                        const newReview = new Review(req.body);
+                        newReview
+                            .save()
+                            .then(review => {
+                                res.json({
+                                    review: review
+                                })
+                            })
                     }
+                });
+            }
 
-                })
-                .catch(err => {
-                    error: err
-                })
-    })
-    .catch(err => {
-        error: err
-    })
+        })
+        .catch(err => {
+            error: err
+        })
 
 });
 
