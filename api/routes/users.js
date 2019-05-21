@@ -283,7 +283,13 @@ router.patch('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => 
             .then(user => {
                 if (user) {
                     User.findByIdAndUpdate(id,req.body,{new:true}).then((updatedUser)=>{
-                        res.status(200).json(updatedUser);
+                        const updated={};
+                        updated.id=updatedUser._id;
+                        updated.isVendor=updatedUser.isVendor;
+                        updated.isAdmin=updatedUser.isAdmin;
+                        updated.name=updatedUser.name;
+                        updated.email=updatedUser.email;
+                        res.status(200).json(updated);
                     });
                 } else {
                     res.status(404).json({
