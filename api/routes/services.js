@@ -35,7 +35,7 @@ router.get("/", (req, res, next) => {
 
 //Api for posting a service (Access: vendor)
 router.post("/", checkAuth, (req, res, next) => {
-    const { name, detail, rating } = req.body;
+    const { name, detail, rating, categoryName } = req.body;
 
     // Validation
     let validator = new v(req.body, {
@@ -50,12 +50,13 @@ router.post("/", checkAuth, (req, res, next) => {
             const vendor = req.user.id;
             const newService = new Service({
                 name,
+                categoryName,
                 vendor,
                 detail,
                 rating
             });
 
-            Service.findOne({ vendor, name })
+            Service.findOne({ vendor, categoryName })
                 .then(service => {
                     if (service) return res.status(400).json({ msg: 'Vendor service already exists' });
 
@@ -98,6 +99,32 @@ router.get('/:serviceId', (req, res) => {
             } else {
                 res.status(404).json({
                     message: "No entry found for given ID"
+                })
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            })
+        })
+})
+
+// Get services by categoryName  (access: all)
+router.get('categoryName/:categoryName', (req, res) => {
+    const categoryName = req.params.categoryName;
+    Service.find({ categoryName })
+        .exec()
+        .populate('vendor', '_id name')
+        
+        .then(services => {
+            if (services) {
+                res.status(200).json({
+                    services: services
+                })
+            } else {
+                res.status(404).json({
+                    message: "No entry found for given categoryName"
                 })
             }
         })
