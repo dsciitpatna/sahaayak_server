@@ -111,30 +111,29 @@ router.get('/:serviceId', (req, res) => {
 })
 
 // Get services by categoryName  (access: all)
-router.get('categoryName/:categoryName', (req, res) => {
-    const categoryName = req.params.categoryName;
-    Service.find({ categoryName })
-        .exec()
+router.get('/categoryName/:categoryName', (req, res, next) => {
+    const categoryName=req.params.categoryName;
+    Service.find({categoryName})
         .populate('vendor', '_id name')
-        
+        .exec()
         .then(services => {
             if (services) {
                 res.status(200).json({
                     services: services
-                })
+                });
             } else {
                 res.status(404).json({
-                    message: "No entry found for given categoryName"
-                })
+                    message: "No entry found"
+                });
             }
         })
         .catch(err => {
             console.log(err);
             res.status(500).json({
                 error: err
-            })
-        })
-})
+            });
+        });
+});
 
 
 // Get all services provided by a vendor
