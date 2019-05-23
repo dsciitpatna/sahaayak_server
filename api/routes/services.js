@@ -63,7 +63,7 @@ router.post("/", checkAuth, (req, res, next) => {
                         newService
                             .save()
                             .then(service => {
-                                res.json({
+                                res.status(200).json({
                                     service: service
                                 })
                             })
