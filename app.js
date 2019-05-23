@@ -8,7 +8,7 @@ const app = express();
 const db = config.get('mongoURI');
 
 const usersRoutes = require('./api/routes/users');
-const catagoriesRoutes = require('./api/routes/catagories');
+const categoriesRoutes = require('./api/routes/categories');
 const servicesRoutes = require('./api/routes/services');
 const reviewsRoutes = require('./api/routes/reviews');
 
@@ -30,7 +30,7 @@ app.use(cors());
 
 // Routes to handle requests
 app.use('/users', usersRoutes);
-app.use('/catagories', catagoriesRoutes);
+app.use('/categories', categoriesRoutes);
 app.use('/services', servicesRoutes);
 app.use('/reviews', reviewsRoutes);
 
