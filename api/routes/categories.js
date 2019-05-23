@@ -7,10 +7,10 @@ const v = require('node-input-validator');
 
 const checkAuth = require('../middleware/auth');
 
-const Catagories = require('../models/catagory');
+const Categories = require('../models/category');
 
 router.get("/", (req, res, next) => {
-    Catagories.find()
+    Categories.find()
         .exec()
         .then(category => {
             if (category) {
@@ -40,18 +40,18 @@ router.post('/',checkAuth,(req,res)=>{
     if(!isAdmin) return res.status(422).json({msg: "Unauthorised Request"})
 
     let validator = new v(req.body, {
-        name: 'required|minLength:7'
+        name: 'required|minLength:4'
     });
 
     validator.check().then(function(matched){
         if(!matched) {
             res.status(422).json({msg:validator.errors})
         } else {
-            const newCategory = new Catagories({
+            const newCategory = new Categories({
                 name
             })
 
-            Catagories.findOne({name})
+            Categories.findOne({name})
                       .then(category=>{
                         if (category) return res.status(400).json({ msg: 'Category Already exists' })  
 
@@ -77,7 +77,7 @@ router.delete('/:categoryId', checkAuth, (req, res) => {
     const isAdmin = req.user.isAdmin;
     
     if (isAdmin) {
-        Catagories.remove({ _id: id }, (err) => {
+        Categories.remove({ _id: id }, (err) => {
             if (!err) {
                 return res.status(200).json({
                     message: "Successfully Removed"
@@ -97,11 +97,11 @@ router.delete('/:categoryId', checkAuth, (req, res) => {
 })
 
 
-router.patch('/:catagoryId',checkAuth,(req,res)=>{
+router.patch('/:categoryId',checkAuth,(req,res)=>{
     const id = req.params.categoryId;
     const isAdmin = req.user.isAdmin;
 
-    if(isAdmin) return res.status(422).json({msg: "Unauthorised Request"})
+    if(!isAdmin) return res.status(422).json({msg: "Unauthorised Request"})
 
     let validator = new v(req.body, {
         name: 'required|minLength:7'
@@ -111,11 +111,11 @@ router.patch('/:catagoryId',checkAuth,(req,res)=>{
         if (!matched) {
             res.status(422).json({ msg: validator.errors });
         } else {
-            Catagories.findById(id)
+            Categories.findById(id)
             .exec()
             .then(category => {
                 if (category) {
-                    Catagories.findByIdAndUpdate(id,req.body,{new:true}).then((updatedCategory)=>{
+                    Categories.findByIdAndUpdate(id,req.body,{new:true}).then((updatedCategory)=>{
                         res.status(200).json(updatedCategory);
                     });
                 } else {
