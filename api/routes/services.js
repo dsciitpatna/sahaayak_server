@@ -61,10 +61,10 @@ router.get("/", (req, res, next) => {
 //Api for posting a service (Access: vendor)
 router.post("/",checkAuth,upload.single('vendorImage') ,(req, res, next) => {
     const { name, detail, rating, categoryName } = req.body;
-
+    const vendorImagePath = req.file.path
     // Validation
     let validator = new v(req.body, {
-        name: 'required|minLength:5'
+        name: 'required|minLength:5',
     });
 
     validator.check().then(function (matched) {
@@ -78,7 +78,8 @@ router.post("/",checkAuth,upload.single('vendorImage') ,(req, res, next) => {
                 categoryName,
                 vendor,
                 detail,
-                rating
+                rating,
+                vendorImagePath
             });
 
             Service.findOne({ vendor, categoryName })
