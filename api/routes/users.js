@@ -22,7 +22,7 @@ router.post('/signup', (req, res) => {
 
     validator.check().then(function (matched) {
         if (!matched) {
-            res.status(422).json({ msg: validator.errors });
+            res.status(422).json({ msg:validator.errors.name.message });
         }
         else {
             const newUser = new User({
