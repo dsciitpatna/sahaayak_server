@@ -3,6 +3,31 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const config = require('config');
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: (req,file,cb)=>{
+        cb(null,'./uploads')
+    },
+    filename: (req,file,cb)=>{
+        cb(null,Date().toString()+'.jpg')
+    }
+})
+const fileFilter  = (req,file,cb)=>{
+    if(file.mimetype === 'image/jpeg'){
+        cb(null,true)
+    }
+    else{
+        cb(null,false)
+    }
+}
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize : 1024*1024*5
+    },
+    fileFilter: fileFilter
+});
 const v = require('node-input-validator');
 
 const checkAuth = require('../middleware/auth');
@@ -34,7 +59,7 @@ router.get("/", (req, res, next) => {
 });
 
 //Api for posting a service (Access: vendor)
-router.post("/", checkAuth, (req, res, next) => {
+router.post("/",checkAuth,upload.single('vendorImage') ,(req, res, next) => {
     const { name, detail, rating, categoryName } = req.body;
 
     // Validation
