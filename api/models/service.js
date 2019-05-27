@@ -18,7 +18,12 @@ const ServiceSchema = new Schema({
     detail: {
         description: String,
         location: String,
-        contact: String
+        contact: String,
+        establishedDate: Date,
+        email: String,
+        operationalTime: String,
+        websiteLink: String
+
     },
     rating: {
         type: Number,
