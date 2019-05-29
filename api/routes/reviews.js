@@ -11,7 +11,53 @@ const Reviews = require('../models/review');
 
 module.exports = router;
 
+//Api for posting a review
+router.post("/:serviceId", checkAuth, (req, res, next) => {
+    const { rating,review } = req.body;
+    // Validation
+    let validator = new v(req.body, {
+        rating: 'required|integer',
+        review: 'required|string'
+    });
 
+    const loggedUserId = req.user.id;
+    const serviceId = req.params.serviceId
+
+    validator.check().then(function (matched) {
+        if (!matched) {
+            res.status(422).json({ msg: validator.errors });
+        }
+        else {
+            const newReview = new Review({
+                    user:loggedUserId,
+                    rating,
+                    service: serviceId,
+                    review,
+            });
+
+            Reviews.findOne({ user:loggedUserId,service:serviceId })
+                .then(review => {
+                    if (review) return res.status(400).json({ msg: 'Cannot review more than once' });
+                    else{
+                        newReview
+                            .save()
+                            .then(review => {
+                                res.status(200).json({
+                                    review: review
+                                })
+                            })
+                        }
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    });
+                })
+        }
+    });
+
+});
 
 // Api for getting all reviews for a particular service Id
 
