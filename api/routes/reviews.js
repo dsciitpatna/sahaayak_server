@@ -17,7 +17,6 @@ router.post("/:serviceId", checkAuth, (req, res, next) => {
     // Validation
     let validator = new v(req.body, {
         rating: 'required|integer',
-        review: 'required|string'
     });
 
     const user = req.user.id;
