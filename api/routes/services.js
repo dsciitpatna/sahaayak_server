@@ -214,7 +214,7 @@ router.delete('/:serviceId', checkAuth, (req, res) => {
     const vendorId = req.user.id;
 
     const { isVendor, isAdmin } = req.user
-    if (isVendor || isAdmin) {
+    if (isVendor && !isAdmin) {
         Services.findOne({ _id: id, vendor: vendorId })
             .exec()
             .then(service => {
@@ -222,7 +222,34 @@ router.delete('/:serviceId', checkAuth, (req, res) => {
                     Service.findByIdAndRemove(id)
                         .exec()
                         .then(servic => {
-                            res.status(200).json({ service: servic })
+                            res.status(200).json({ msg: "Service deleted" })
+                        })
+                        .catch(err => {
+                            res.status(404).json({
+                                error: err
+                            })
+                        })
+                }
+                else {
+                    res.status(404).json({
+                        message: "No Entry Found"
+                    })
+                }
+            })
+            .catch(err => {
+                error: err
+            })
+    }
+
+    if ( isAdmin && !isVendor ) {
+        Services.findOne({ _id: id })
+            .exec()
+            .then(service => {
+                if (service) {
+                    Service.findByIdAndRemove(id)
+                        .exec()
+                        .then(servic => {
+                            res.status(200).json({ msg: "Service deleted" })
                         })
                         .catch(err => {
                             res.status(404).json({
