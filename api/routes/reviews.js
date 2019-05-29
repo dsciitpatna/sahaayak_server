@@ -20,8 +20,8 @@ router.post("/:serviceId", checkAuth, (req, res, next) => {
         review: 'required|string'
     });
 
-    const loggedUserId = req.user.id;
-    const serviceId = req.params.serviceId
+    const user = req.user.id;
+    const service = req.params.serviceId
 
     validator.check().then(function (matched) {
         if (!matched) {
@@ -29,13 +29,13 @@ router.post("/:serviceId", checkAuth, (req, res, next) => {
         }
         else {
             const newReview = new Review({
-                    user:loggedUserId,
+                    user,
                     rating,
-                    service: serviceId,
-                    review,
+                    service,
+                    review
             });
 
-            Reviews.findOne({ user:loggedUserId,service:serviceId })
+            Reviews.findOne({ user,service })
                 .then(review => {
                     if (review) return res.status(400).json({ msg: 'Cannot review more than once' });
                     else{
