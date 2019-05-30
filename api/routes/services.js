@@ -161,6 +161,43 @@ router.get('/vendors/:vendorId', checkAuth, (req, res) => {
         })
 })
 
+// Delete all services provided by a vendor (Access: this.vendor & Admin)
+
+router.delete('/vendors/:vendorId', checkAuth, (req, res) => {
+    const vendorId = req.params.vendorId;
+    if(!req.user.isAdmin && (req.user.isVendor && req.user.id!==vendorId)) {
+        return res.status(500).json({
+            message: "Unauthorized Access"
+        })
+    }
+    Service.find({vendor: vendorId})
+        .exec()
+        .then(services => {
+            if (services.length !== 0) {
+                Service.deleteMany({vendor: vendorId})
+                .then( (services)=> {
+                    res.status(200).json({ msg: "All services deleted" })
+                })
+                .catch(err => {
+                    res.status(404).json({
+                        error: err
+                    })
+                })
+
+            }
+            else {
+                res.status(400).json({
+                    message: "No entry for given vendor id"
+                })
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            })
+        })
+})
+
 
 // Update a service by Id  (access: vendor)
 router.patch('/:serviceId', checkAuth, (req, res) => {
@@ -188,7 +225,7 @@ router.patch('/:serviceId', checkAuth, (req, res) => {
                                 res.status(200).json(updatedService);
                             });
                         } else {
-                            res.status(422).json({
+                            return res.status(422).json({
                                 message: "Unauthorised Request"
                             })
                         }
