@@ -12,8 +12,8 @@ Sahaayak is a platform for the talented vendors and people who all are willing t
 | /:vendorId | [GET]    | get vendor details              | (Anyone)           |
 | /:buyerId  | [GET]    | get buyer details               | (this.user,Admin)  |
 | /:Id       | [PATCH]  | update user details             | (this.user)        |
-| /:Id       | [DELETE] | get user details                | (this.user, Admin) |
-| /vendors   | [GET]    | get list of all vendors details | (Admin)           |
+| /:Id       | [DELETE] | delete user account             | (this.user, Admin) |
+| /vendors   | [GET]    | get list of all vendors details | (Admin)            |
 #### /catagories
 | Route        | Method   | Description           | Authorization |
 |--------------|----------|-----------------------|---------------|
@@ -22,15 +22,16 @@ Sahaayak is a platform for the talented vendors and people who all are willing t
 | /:catagoryId | [PATCH]  | Update catagory by Id | (Admin)       |
 | /:catagoryId | [DELETE] | Delete catagory by Id | (Admin)       |
 #### /services
-| Route             | Method   | Description                             | Authorization   |
-|-------------------|----------|-----------------------------------------|-----------------|
-| /                 | [GET]    | get all services                        | (Anyone)        |
-| /                 | [POST]   | add new service                         | (Vendor)        |
-| /:catagoryName    | [GET]    | Get all services in given catagory      | (Anyone)        |
-| /:serviceId       | [GET]    | Get service by given Id                 | (Anyone)        |
-| /:serviceId       | [PATCH]  | Update service by Id                    | (Vendor)        |
-| /:serviceId       | [DELETE] | Delete service by Id                    | (Vendor, Admin) |
-| /vendors/vendorId | [GET]    | get all services provided by the vendor | (Anyone)        |
+| Route                        | Method   | Description                             | Authorization   |
+|------------------------------|----------|-----------------------------------------|-----------------|
+| /                            | [GET]    | get all services                        | (Anyone)        |
+| /                            | [POST]   | add new service                         | (Vendor)        |
+| /categoryName/:catagoryName  | [GET]    | Get all services in given catagory      | (Anyone)        |
+| /:serviceId                  | [GET]    | Get service by given Id                 | (Anyone)        |
+| /:serviceId                  | [PATCH]  | Update service by Id                    | (Vendor)        |
+| /:serviceId                  | [DELETE] | Delete service by Id                    | (Vendor, Admin) |
+| /vendors/:vendorId           | [GET]    | get all services provided by the vendor | (Anyone)        |
+| /vendors/:vendorId           | [DELETE] | delete all services of a vendor         | (Vendor, Admin) |       |
 #### /reviews
 | Route               | Method   | Description                                            | Authorization                                 |
 |---------------------|----------|--------------------------------------------------------|-----------------------------------------------|
