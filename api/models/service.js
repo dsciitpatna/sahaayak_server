@@ -29,6 +29,10 @@ const ServiceSchema = new Schema({
         type: Number,
         default: -1
     },
+    vendorImagePath : {
+        type: String,
+        required:true
+    },
     register_date: {
         type: Date,
         default: Date.now
