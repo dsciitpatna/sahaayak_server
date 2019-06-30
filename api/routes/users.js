@@ -15,7 +15,6 @@ router.post('/signup', (req, res) => {
 
     // Validation
     let validator = new v(req.body, {
-        name: 'required|minLength:5',
         email: 'required|email',
         password: 'required'
     });
