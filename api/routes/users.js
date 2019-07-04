@@ -308,6 +308,46 @@ router.patch('/:Id', checkAuth /* Calling middleware for auth */, (req, res) => 
     
 })
 
+//API for changing the password(Vendor)
+
+
+router.patch('/password/:Id', checkAuth /* Calling middleware for auth */, (req, res) => {
+    const id = req.params.Id;
+    let { newPassword,oldPassword } = req.body;
+    console.log(newPassword);
+    let obj={};
+    if(newPassword === oldPassword && newPassword !==""){
+       return  res.status(422).json({
+            msg: "Cannot set this password"
+        })
+    }
+    if(newPassword){
+        obj.newPassword='required';
+        let salt = bcrypt.genSaltSync(10);
+        let hash = bcrypt.hashSync(newPassword, salt);
+        newPassword =  hash;
+    }
+    // Validation
+    let validator = new v(req.body, obj);
+
+    validator.check().then(function (matched) {
+        if (!matched) {
+            return res.status(422).json({ msg: validator.errors });
+        }
+        User.findByIdAndUpdate(id,{password: newPassword}).then((updatedUser)=>{
+        res.status(200).json(updatedUser);
+        })
+        .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+
+        });
+    });
+
+
 
 // Add other APIs as mentioned in the API schema
 
