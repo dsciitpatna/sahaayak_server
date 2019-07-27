@@ -35,28 +35,24 @@ router.get("/", (req, res, next) => {
 
 //Api for posting a service (Access: vendor)
 router.post("/", checkAuth, (req, res, next) => {
-    const { name, detail, rating, categoryName } = req.body;
-
+    const { business,contact,location } = req.body;
+    const {categoryName} = business;
     // Validation
     let validator = new v(req.body, {
-        name: 'required|minLength:5'
+        //empty for now
     });
 
-    validator.check().then(function (matched) {
-        if (!matched) {
-            res.status(422).json({ msg: validator.errors });
-        }
-        else {
+
             const vendor = req.user.id;
+            console.log(req.user,vendor);
             const newService = new Service({
-                name,
-                categoryName,
+                business,
+                contact,
                 vendor,
-                detail,
-                rating
+                location
             });
 
-            Service.findOne({ vendor, categoryName })
+            Service.findOne({vendor,categoryName})
                 .then(service => {
                     if (service) return res.status(400).json({ msg: 'Vendor service already exists' });
 
@@ -80,8 +76,6 @@ router.post("/", checkAuth, (req, res, next) => {
                         error: err
                     });
                 })
-        }
-    });
 
 });
 
@@ -113,7 +107,7 @@ router.get('/:serviceId', (req, res) => {
 // Get services by categoryName  (access: all)
 router.get('/categoryName/:categoryName', (req, res, next) => {
     const categoryName=req.params.categoryName;
-    Service.find({categoryName})
+    Service.find({'business.categoryName': categoryName})
         .populate('vendor', '_id name')
         .exec()
         .then(services => {
@@ -202,20 +196,16 @@ router.delete('/vendors/:vendorId', checkAuth, (req, res) => {
 // Update a service by Id  (access: vendor)
 router.patch('/:serviceId', checkAuth, (req, res) => {
     const id = req.params.serviceId;
-    const { name, detail, rating } = req.body;
+//
 
-    const obj = {};
-    if (name) {
-        obj.name = 'required|minLength:5';
-    }
+    // const obj = {};
+    // if (name) {
+    //     obj.name = 'required|minLength:5';
+    // }
 
     // Validation
-    let validator = new v(req.body, obj);
+    //let validator = new v(req.body, obj);
 
-    validator.check().then(function (matched) {
-        if (!matched) {
-            res.status(422).json({ msg: validator.errors });
-        } else {
             Service.findById(id)
                 .exec()
                 .then(service => {
@@ -241,8 +231,7 @@ router.patch('/:serviceId', checkAuth, (req, res) => {
                         error: err
                     })
                 })
-        }
-    });
+ 
 })
 // Api to delete a service
 router.delete('/:serviceId', checkAuth, (req, res) => {
